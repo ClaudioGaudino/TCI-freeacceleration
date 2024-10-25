@@ -1,9 +1,7 @@
 import pandas as pd
-import matplotlib.pyplot as plot
-import matplotlib.animation as anim
-import numpy as np
-import time
-from scipy.spatial.transform import Rotation as R
+import matplotlib.pyplot as plt
+from utils import convert_to_local
+
 
 filename = ('data\\data.csv')
 time_col = 'SampleTimeFine'
@@ -15,6 +13,8 @@ x_rot_col = 'Euler_X'
 y_rot_col = 'Euler_Y'
 z_rot_col = 'Euler_Z'
 
+local = True
+
 df = pd.read_csv(filename)
 
 
@@ -24,37 +24,14 @@ df.sort_values(time_col)
 mintime = df[time_col].min()
 maxtime = df[time_col].max()
 
-plot.figure(figsize=(16, 9), dpi=100)
-plot.xlim(mintime, maxtime)
-plot.plot(df[time_col], df[x_acc_col], color='red', label='X')
-plot.plot(df[time_col], df[y_acc_col], color='green', label='Y')
-plot.plot(df[time_col], df[z_acc_col], color='blue', label='Z')
-plot.grid(True, which='both')
-plot.title('Acceleration (Sensor relative)')
-plot.xlabel('Time')
-plot.ylabel('Acceleration')
-plot.legend()
-plot.show()
+plt.figure(figsize=(16, 9), dpi=100)
+plt.xlim(mintime, maxtime)
+if local:
+    local_x_acc = []
+    local_y_acc = []
+    local_z_acc = []
 
-
-# rotate frame of reference to be Local
-
-
-def convert_to_local(angles, acc, gyro=None):
-    rotation = R.from_euler('xyz', angles, degrees=True)
-
-    local_acc = rotation.apply(acc)
-
-    if gyro is not None:
-        local_gyro = rotation.apply(gyro)
-        return local_acc, local_gyro
-
-    else:
-        return local_acc
-
-def get_reading_local():
-    for _i, row in df.iterrows():
-
+    for _, row in df.iterrows():
         x_acc = row[x_acc_col]
         y_acc = row[y_acc_col]
         z_acc = row[z_acc_col]
@@ -63,55 +40,26 @@ def get_reading_local():
         y_rot = row[y_rot_col]
         z_rot = row[z_rot_col]
 
-        time = row[time_col]
+        lx, ly, lz = convert_to_local([x_rot, y_rot, z_rot], [x_acc, y_acc, z_acc])
 
-        x, y, z = convert_to_local([x_rot, y_rot, z_rot], [x_acc, y_acc, z_acc])
+        local_x_acc.append(lx)
+        local_y_acc.append(ly)
+        local_z_acc.append(lz)
 
-        yield x, y, z, time
+    plt.plot(df[time_col], local_x_acc, color='red', label='X')
+    plt.plot(df[time_col], local_y_acc, color='green', label='Y')
+    plt.plot(df[time_col], local_z_acc, color='blue', label='Z')
+    plt.title('Free Acceleration')
+else:
+    plt.plot(df[time_col], df[x_acc_col], color='red', label='X')
+    plt.plot(df[time_col], df[y_acc_col], color='green', label='Y')
+    plt.plot(df[time_col], df[z_acc_col], color='blue', label='Z')
+    plt.title('Acceleration (Sensor relative)')
+plt.grid(True, which='both')
 
-
-local_x_acc = []
-local_y_acc = []
-local_z_acc = []
-
-times = []
-
-secs = 60*1
-
-gen = get_reading_local()
-def animate(frame):
-    lx, ly, lz, time = next(gen)
-
-    local_x_acc.append(lx)
-    local_y_acc.append(ly)
-    local_z_acc.append(lz)
-
-    times.append(frame)
-
-    if len(local_x_acc) >= secs:
-        local_x_acc.pop(0)
-    if len(local_y_acc) >= secs:
-        local_y_acc.pop(0)
-    if len(local_z_acc) >= secs:
-        local_z_acc.pop(0)
-    if len(times) >= secs:
-        times.pop(0)
-
-    print(len(times))
-
-    ax.plot(frame, lx, color='red', label='X')
-    ax.plot(frame, ly, color='green', label='Y')
-    ax.plot(frame, lz, color='blue', label='Z')
+plt.xlabel('Time')
+plt.ylabel('Acceleration')
+plt.legend()
+plt.show()
 
 
-fig, ax = plot.subplots()
-ax.grid(True, which='both')
-ax.set_title('Acceleration (Local)')
-ax.set_xlabel('Time')
-ax.set_ylabel('Acceleration')
-ax.legend()
-a = anim.FuncAnimation(fig, animate, interval=(1000/60), blit=False, save_count=0, cache_frame_data=False)
-
-plot.show()
-
-#print(np.mean(times))
