@@ -1,9 +1,9 @@
 import pandas as pd
 import matplotlib.pyplot as plt
-from utils import convert_to_local
+from utils import convert_to_free
 
 
-filename = ('data\\data.csv')
+filename = ('data\\lean_on_faces.csv')
 time_col = 'SampleTimeFine'
 x_acc_col = 'Acc_X'
 y_acc_col = 'Acc_Y'
@@ -40,7 +40,7 @@ if local:
         y_rot = row[y_rot_col]
         z_rot = row[z_rot_col]
 
-        lx, ly, lz = convert_to_local([x_rot, y_rot, z_rot], [x_acc, y_acc, z_acc])
+        lx, ly, lz = convert_to_free([x_rot, y_rot, z_rot], [x_acc, y_acc, z_acc])
 
         local_x_acc.append(lx)
         local_y_acc.append(ly)

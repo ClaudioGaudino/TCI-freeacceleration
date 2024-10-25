@@ -2,7 +2,7 @@ import pandas as pd
 import matplotlib.pyplot as plot
 import matplotlib.animation as anim
 import time as t
-from utils import convert_to_local
+from utils import convert_to_free
 
 filename = ('data\\data.csv')
 time_col = 'SampleTimeFine'
@@ -33,7 +33,7 @@ def get_reading(local=True):
 
         time = row[time_col]
         if local:
-            x, y, z = convert_to_local([x_rot, y_rot, z_rot], [x_acc, y_acc, z_acc])
+            x, y, z = convert_to_free([x_rot, y_rot, z_rot], [x_acc, y_acc, z_acc])
 
             yield x, y, z, time
         else:
