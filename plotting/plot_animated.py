@@ -20,7 +20,7 @@ df[time_col] = pd.to_numeric(df[time_col], errors='coerce')
 df.sort_values(time_col)
 
 
-def get_reading(local=True):
+def get_reading(free=True):
     for _i, row in df.iterrows():
 
         x_acc = row[x_acc_col]
@@ -32,7 +32,7 @@ def get_reading(local=True):
         z_rot = row[z_rot_col]
 
         time = row[time_col]
-        if local:
+        if free:
             x, y, z = convert_to_free([x_rot, y_rot, z_rot], [x_acc, y_acc, z_acc])
 
             yield x, y, z, time
@@ -49,7 +49,7 @@ times = []
 
 secs = 60 * 1
 
-gen = get_reading(local=True)
+gen = get_reading(free=True)
 
 
 def animate(frame):
