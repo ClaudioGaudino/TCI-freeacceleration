@@ -1,4 +1,5 @@
 from scipy.spatial.transform import Rotation as R
+import pandas as pd
 
 g = 9.80665
 
@@ -13,3 +14,95 @@ def convert_to_free(angles, acc, gyro=None):
 
     else:
         return local_acc
+
+
+def emt_to_csv(path: str):
+    data = ''
+    with open(path, 'r') as file:
+        blanks = 0
+        for line in file:
+            if blanks < 3:
+                if line == '\n':
+                    blanks += 1
+                    continue
+            else:
+                if line == '\n' or line == '':
+                    break
+                else:
+                    row = line.split()
+                    for d in row:
+                        data += d.strip() + ','
+                    data += '\n'
+    with open(path.replace('.emt', '.csv'), 'w') as csv_file:
+        csv_file.write(data)
+    return
+
+class Config:
+    def __init__(self):
+        self.plot_z = None
+        self.plot_y = None
+        self.plot_x = None
+        self.free_acc = None
+        self.z_ang_vel_col = None
+        self.y_ang_vel_col = None
+        self.x_ang_vel_col = None
+        self.z_rot_col = None
+        self.y_rot_col = None
+        self.x_rot_col = None
+        self.z_acc_col = None
+        self.y_acc_col = None
+        self.file = None
+        self.x_acc_col = None
+        self.multifile = False
+        self.file_angles = None
+        self.file_acceleration = None
+        self.file_angular_velocity = None
+
+    def setup(self, path: str):
+        with open(path, 'r') as ini:
+            for line in ini:
+                print(line)
+                if line.startswith('#'):
+                    continue
+
+                if line.startswith('file multipli='):
+                    self.multifile = bool(line.split('=')[1].strip())
+
+                if self.multifile:
+                    if line.startswith('file accelerazioni='):
+                        self.file_acceleration = line.split('=')[1]
+                    if line.startswith('file angoli='):
+                        self.file_angles = line.split('=')[1]
+                    if line.startswith('file velocita angolari='):
+                        self.file_angular_velocity = line.split('=')[1]
+                else:
+                    if line.startswith('file dati='):
+                        self.file = line.split('=')[1]
+                
+                if line.startswith('accelerazione asse x='):
+                    self.x_acc_col = line.split('=')[1]
+                if line.startswith('accelerazione asse y='):
+                    self.y_acc_col = line.split('=')[1]
+                if line.startswith('accelerazione asse z='):
+                    self.z_acc_col = line.split('=')[1]
+                if line.startswith('angolazioni asse x='):
+                    self.x_rot_col = line.split('=')[1]
+                if line.startswith('angolazioni asse y='):
+                    self.y_rot_col = line.split('=')[1]
+                if line.startswith('angolazioni asse z='):
+                    self.z_rot_col = line.split('=')[1]
+                if line.startswith('velocita angolare asse x='):
+                    self.x_ang_vel_col = line.split('=')[1]
+                if line.startswith('velocita angolare asse y='):
+                    self.y_ang_vel_col = line.split('=')[1]
+                if line.startswith('velocita angolare asse z='):
+                    self.z_ang_vel_col = line.split('=')[1]
+                if line.startswith('free acceleration='):
+                    self.free_acc = bool(line.split('=')[1])
+                if line.startswith('asse x='):
+                    self.plot_x = bool(line.split('=')[1])
+                if line.startswith('asse y='):
+                    self.plot_y = bool(line.split('=')[1])
+                if line.startswith('asse z='):
+                    self.plot_z = bool(line.split('=')[1])
+                
