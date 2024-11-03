@@ -39,6 +39,10 @@ def emt_to_csv(path: str):
 
 class Config:
     def __init__(self):
+        self.ang_vel_time = None
+        self.ang_time = None
+        self.acc_time = None
+        self.time = None
         self.plot_z = None
         self.plot_y = None
         self.plot_x = None
@@ -60,49 +64,59 @@ class Config:
 
     def setup(self, path: str):
         with open(path, 'r') as ini:
+            value = None
             for line in ini:
-                print(line)
                 if line.startswith('#'):
                     continue
 
                 if line.startswith('file multipli='):
-                    self.multifile = bool(line.split('=')[1].strip())
+                    value = eval(line.split('=')[1].strip())
+                    print(value)
+                    self.multifile = value
 
                 if self.multifile:
                     if line.startswith('file accelerazioni='):
-                        self.file_acceleration = line.split('=')[1]
+                        self.file_acceleration = line.split('=')[1].strip()
                     if line.startswith('file angoli='):
-                        self.file_angles = line.split('=')[1]
+                        self.file_angles = line.split('=')[1].strip()
                     if line.startswith('file velocita angolari='):
-                        self.file_angular_velocity = line.split('=')[1]
+                        self.file_angular_velocity = line.split('=')[1].strip()
                 else:
                     if line.startswith('file dati='):
-                        self.file = line.split('=')[1]
+                        self.file = line.split('=')[1].strip()
                 
                 if line.startswith('accelerazione asse x='):
-                    self.x_acc_col = line.split('=')[1]
-                if line.startswith('accelerazione asse y='):
-                    self.y_acc_col = line.split('=')[1]
-                if line.startswith('accelerazione asse z='):
-                    self.z_acc_col = line.split('=')[1]
-                if line.startswith('angolazioni asse x='):
-                    self.x_rot_col = line.split('=')[1]
-                if line.startswith('angolazioni asse y='):
-                    self.y_rot_col = line.split('=')[1]
-                if line.startswith('angolazioni asse z='):
-                    self.z_rot_col = line.split('=')[1]
-                if line.startswith('velocita angolare asse x='):
-                    self.x_ang_vel_col = line.split('=')[1]
-                if line.startswith('velocita angolare asse y='):
-                    self.y_ang_vel_col = line.split('=')[1]
-                if line.startswith('velocita angolare asse z='):
-                    self.z_ang_vel_col = line.split('=')[1]
-                if line.startswith('free acceleration='):
-                    self.free_acc = bool(line.split('=')[1])
-                if line.startswith('asse x='):
-                    self.plot_x = bool(line.split('=')[1])
-                if line.startswith('asse y='):
-                    self.plot_y = bool(line.split('=')[1])
-                if line.startswith('asse z='):
-                    self.plot_z = bool(line.split('=')[1])
+                    self.x_acc_col = line.split('=')[1].strip()
+                elif line.startswith('accelerazione asse y='):
+                    self.y_acc_col = line.split('=')[1].strip()
+                elif line.startswith('accelerazione asse z='):
+                    self.z_acc_col = line.split('=')[1].strip()
+                elif line.startswith('angolazioni asse x='):
+                    self.x_rot_col = line.split('=')[1].strip()
+                elif line.startswith('angolazioni asse y='):
+                    self.y_rot_col = line.split('=')[1].strip()
+                elif line.startswith('angolazioni asse z='):
+                    self.z_rot_col = line.split('=')[1].strip()
+                elif line.startswith('velocita angolare asse x='):
+                    self.x_ang_vel_col = line.split('=')[1].strip()
+                elif line.startswith('velocita angolare asse y='):
+                    self.y_ang_vel_col = line.split('=')[1].strip()
+                elif line.startswith('velocita angolare asse z='):
+                    self.z_ang_vel_col = line.split('=')[1].strip()
+                elif line.startswith('free acceleration='):
+                    self.free_acc = eval(line.split('=')[1].strip())
+                elif line.startswith('asse x='):
+                    self.plot_x = eval(line.split('=')[1].strip())
+                elif line.startswith('asse y='):
+                    self.plot_y = eval(line.split('=')[1].strip())
+                elif line.startswith('asse z='):
+                    self.plot_z = eval(line.split('=')[1].strip())
+                elif line.startswith('tempo generale='):
+                    self.time = line.split('=')[1].strip()
+                elif line.startswith('tempo accelerazioni='):
+                    self.acc_time = line.split('=')[1].strip()
+                elif line.startswith('tempo angolazioni='):
+                    self.ang_time = line.split('=')[1].strip()
+                elif line.startswith('tempo velocita angolari='):
+                    self.ang_vel_time = line.split('=')[1].strip()
                 

@@ -6,26 +6,24 @@ cog = utils.Config()
 cog.setup('setup.ini')
 
 multifile = cog.multifile
+print(cog.file_acceleration)
+filename = cog.file
+fileAccelerations = cog.file_acceleration
+fileAngles = cog.file_angles
 
-filename = cog.
-fileAccelerations ='data\\accelerazione.emt'
-fileAngles ='data\\Angoli.emt'
+time_col = cog.time
 
-join_col = 'Frame'
-time_col = 'Time'
+x_acc_col = cog.x_acc_col
+y_acc_col = cog.y_acc_col
+z_acc_col = cog.z_acc_col
 
-x_acc_col = 'GSensor.X'
-y_acc_col = 'GSensor.Y'
-z_acc_col = 'GSensor.Z'
-
-x_rot_col = 'GSensor.X'
-y_rot_col = 'GSensor.Y'
-z_rot_col = 'GSensor.Z'
-
-local = True
+x_rot_col = cog.x_rot_col
+y_rot_col = cog.y_rot_col
+z_rot_col = cog.z_rot_col
 
 df = None
 if multifile:
+    time_col = cog.acc_time
     if fileAccelerations.__contains__('.emt'):
         utils.emt_to_csv(fileAccelerations)
         fileAccelerations = fileAccelerations.replace('.emt', '.csv')
@@ -35,9 +33,9 @@ if multifile:
 
     df_acc = pd.read_csv(fileAccelerations)
     df_ang = pd.read_csv(fileAngles)
-    df_ang.drop(time_col, axis=1)
+    #df_ang.drop(time_col, axis=1)
 
-    df = pd.merge(df_acc, df_ang, left_on=join_col, right_on=join_col, how='inner')
+    df = pd.merge(df_acc, df_ang, left_on=cog.acc_time, right_on=cog.ang_time, how='inner')
     if x_acc_col == x_rot_col:
         x_acc_col += '_x'
         x_rot_col += '_y'
@@ -47,11 +45,15 @@ if multifile:
     if z_acc_col == z_rot_col:
         z_acc_col += '_x'
         z_rot_col += '_y'
-    time_col += '_x'
+    #time_col += '_x'
 
 else:
+    if filename.__contains__('.emt'):
+        utils.emt_to_csv(filename)
+        filename = filename.replace('.emt', '.csv')
     df = pd.read_csv(filename)
 
+print(df.columns.tolist())
 print(df)
 
 
@@ -60,7 +62,7 @@ maxtime = df[time_col].max()
 
 plt.figure(figsize=(16, 9), dpi=100)
 plt.xlim(mintime, maxtime)
-if local:
+if cog.free_acc:
     local_x_acc = []
     local_y_acc = []
     local_z_acc = []
@@ -80,14 +82,20 @@ if local:
         local_y_acc.append(ly)
         local_z_acc.append(lz)
 
-    plt.plot(df[time_col], local_x_acc, color='red', label='X')
-    #plt.plot(df[time_col], local_y_acc, color='green', label='Y')
-    #plt.plot(df[time_col], local_z_acc, color='blue', label='Z')
+    if cog.plot_x:
+        plt.plot(df[time_col], local_x_acc, color='red', label='X')
+    if cog.plot_y:
+        plt.plot(df[time_col], local_y_acc, color='green', label='Y')
+    if cog.plot_z:
+        plt.plot(df[time_col], local_z_acc, color='blue', label='Z')
     plt.title('Free Acceleration')
 else:
-    plt.plot(df[time_col], df[x_acc_col], color='red', label='X')
-    plt.plot(df[time_col], df[y_acc_col], color='green', label='Y')
-    plt.plot(df[time_col], df[z_acc_col], color='blue', label='Z')
+    if cog.plot_x:
+        plt.plot(df[time_col], df[x_acc_col], color='red', label='X')
+    if cog.plot_y:
+        plt.plot(df[time_col], df[y_acc_col], color='green', label='Y')
+    if cog.plot_z:
+        plt.plot(df[time_col], df[z_acc_col], color='blue', label='Z')
     plt.title('Acceleration (Sensor relative)')
 plt.grid(True, which='both')
 
