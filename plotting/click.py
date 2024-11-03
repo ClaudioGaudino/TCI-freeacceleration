@@ -1,5 +1,6 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+import matplotlib.animation as anim
 import utils
 
 cog = utils.Config()
@@ -20,6 +21,10 @@ z_acc_col = cog.z_acc_col
 x_rot_col = cog.x_rot_col
 y_rot_col = cog.y_rot_col
 z_rot_col = cog.z_rot_col
+
+
+
+
 
 df = None
 if multifile:
@@ -58,8 +63,9 @@ print(df)
 mintime = df[time_col].min()
 maxtime = df[time_col].max()
 
-plt.figure(figsize=(16, 9), dpi=100)
-plt.xlim(mintime, maxtime)
+fig, ax = plt.subplots(figsize=(16, 9))
+
+ax.set_xlim(mintime, maxtime)
 if cog.free_acc:
     local_x_acc = []
     local_y_acc = []
@@ -81,26 +87,40 @@ if cog.free_acc:
         local_z_acc.append(lz)
 
     if cog.plot_x:
-        plt.plot(df[time_col], local_x_acc, color='red', label='X')
+        ax.plot(df[time_col], local_x_acc, color='red', label='X')
     if cog.plot_y:
-        plt.plot(df[time_col], local_y_acc, color='green', label='Y')
+        ax.plot(df[time_col], local_y_acc, color='green', label='Y')
     if cog.plot_z:
-        plt.plot(df[time_col], local_z_acc, color='blue', label='Z')
-    plt.title('Free Acceleration')
+        ax.plot(df[time_col], local_z_acc, color='blue', label='Z')
+    ax.set_title('Free Acceleration')
 else:
     if cog.plot_x:
-        plt.plot(df[time_col], df[x_acc_col], color='red', label='X')
+        ax.plot(df[time_col], df[x_acc_col], color='red', label='X')
     if cog.plot_y:
-        plt.plot(df[time_col], df[y_acc_col], color='green', label='Y')
+        ax.plot(df[time_col], df[y_acc_col], color='green', label='Y')
     if cog.plot_z:
-        plt.plot(df[time_col], df[z_acc_col], color='blue', label='Z')
-    plt.title('Acceleration (Sensor relative)')
+        ax.plot(df[time_col], df[z_acc_col], color='blue', label='Z')
+    ax.set_title('Acceleration (Sensor relative)')
 plt.grid(True, which='both')
 
-plt.xlabel('Time')
-plt.ylabel('Acceleration')
-plt.legend()
+events_x = []
+events_y = []
+def onclick(event):
+    if event.inaxes:
+        events_x.append(event.xdata)
+        events_y.append(event.ydata)
+
+        print(f'clicked at: {event.xdata}, {event.ydata}')
+
+def animate(frame):
+    ax.scatter(events_x, events_y, c='black', zorder=10)
+
+
+ax.set_xlabel('Time')
+ax.set_ylabel('Acceleration')
+ax.legend()
+
+fig.canvas.mpl_connect('button_press_event', onclick)
+a = anim.FuncAnimation(fig, animate, interval=(1000 / 20), blit=False, save_count=0, cache_frame_data=False)
 
 plt.show()
-
-# Function to get data coordinates from plot coordinates
