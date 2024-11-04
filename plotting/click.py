@@ -22,10 +22,6 @@ x_rot_col = cog.x_rot_col
 y_rot_col = cog.y_rot_col
 z_rot_col = cog.z_rot_col
 
-
-
-
-
 df = None
 if multifile:
     time_col = cog.acc_time
@@ -58,7 +54,6 @@ else:
 
 print(df.columns.tolist())
 print(df)
-
 
 mintime = df[time_col].min()
 maxtime = df[time_col].max()
@@ -105,12 +100,17 @@ plt.grid(True, which='both')
 
 events_x = []
 events_y = []
-def onclick(event):
-    if event.inaxes:
-        events_x.append(event.xdata)
-        events_y.append(event.ydata)
+marking = True
 
-        print(f'clicked at: {event.xdata}, {event.ydata}')
+
+def onclick(event):
+    if event.inaxes and marking:
+        x, y = event.xdata, event.ydata
+        events_x.append(x)
+        events_y.append(y)
+
+        print(f'clicked at: {x}, {y}')
+
 
 def animate(frame):
     ax.scatter(events_x, events_y, c='black', zorder=10)
@@ -120,6 +120,7 @@ ax.set_xlabel('Time')
 ax.set_ylabel('Acceleration')
 ax.legend()
 
+fig.canvas.mpl_connect('key_press_event', lambda event: toggle_marking(event, marking))
 fig.canvas.mpl_connect('button_press_event', onclick)
 a = anim.FuncAnimation(fig, animate, interval=(1000 / 20), blit=False, save_count=0, cache_frame_data=False)
 

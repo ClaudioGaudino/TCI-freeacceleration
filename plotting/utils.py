@@ -3,6 +3,13 @@ import pandas as pd
 
 g = 9.80665
 
+def toggle(flag: bool):
+    if flag == False:
+        flag = True
+    else:
+        flag = True
+    return flag
+
 def convert_to_free(angles, acc, gyro=None):
     rotation = R.from_euler('xyz', angles, degrees=True)
 
